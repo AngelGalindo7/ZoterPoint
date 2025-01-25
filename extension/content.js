@@ -1,4 +1,3 @@
-/*
 const cursorDisplay = document.createElement('div');
 cursorDisplay.style.position = 'absolute';
 cursorDisplay.style.top = '10px';
@@ -19,24 +18,46 @@ document.addEventListener('mousemove', function(event) {
 cursorDisplay.addEventListener('click', function() {
   alert('The div was clicked!');
 });
-*/
+
+function writeData(dataString) {
+  chrome.storage.local.set({mouseInfo: dataString}, function() {
+      alert("Data is stored: " + dataString);
+  });
+}
+
+function retrieveData(event) {
+  const cursorX = event.clientX;
+  const cursorY = event.clientY;
+  const currUrl = window.location.href;
+  const dataString = String(cursorX) + " " + String(cursorY) + " " + currUrl;
+  writeData(dataString);
+}
 
 document.addEventListener("mousedown", (event) => {
-  if (event.altKey && event.button == 0) {
-    const cursorX = event.clientX;
-    const cursorY = event.clientY;
-    alert("Mouse pos: " + cursorX + ", " + cursorY);
+  if (event.ctrlKey && event.button == 0) {
+    retrieveData(event);
   }
 });
 
 function exitPresentation() {
-  const exitButton = document.querySelector('.punch-viewer-icon.punch-viewer-icon-tp-bottom-right')
+  const exitButton = document.querySelector('[data-tooltip="Slideshow"]');
   if (exitButton){
-    exitButton.click()
+    exitButton.click();
+  }
+  else {
+    alert('exit button not located');
   }
 }
+
+function displayData() {
+  chrome.storage.local.get(['mouseInfo'], function(result) {
+    // alert(result.mouseInfo);
+    console.log(result.mouseInfo);
+  });
+}
+
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'h'){
-    exitPresentation();
+  if (event.key === 'q'){
+    displayData();
   }
 });
