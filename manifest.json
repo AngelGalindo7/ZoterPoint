@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "Zotter Point",
+    "version": "1.0",
+    "description": "To do later",
+    "permissions": [
+        "identity",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "https://www.googleapis.com/*"
+    ],
+    "background": {
+        "scripts" : ["extension/background.js"]
+    },
+    "oauth2": {
+        "client_id": "private",
+        "scopes": [
+            "https://www.googleapis.com/auth/presentations",
+            "https://www.googleapis.com/auth/drive.file",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/userinfo.email"
+        ]
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["extension/content.js"]
+        }
+    ]
+}

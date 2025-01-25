@@ -28,3 +28,15 @@ document.addEventListener("mousedown", (event) => {
     alert("Mouse pos: " + cursorX + ", " + cursorY);
   }
 });
+
+function exitPresentation() {
+  const exitButton = document.querySelector('.punch-viewer-icon.punch-viewer-icon-tp-bottom-right')
+  if (exitButton){
+    exitButton.click()
+  }
+}
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'h'){
+    exitPresentation();
+  }
+});
