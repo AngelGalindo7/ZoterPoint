@@ -4,7 +4,12 @@
     "version": "1.0",
     "description": "To do later",
     "permissions": [
-        "activeTab"
+        "activeTab",
+        "identity",
+        "storage"
+    ],
+    "host_permissions": [
+        "https://www.googleapis.com/*"
     ],
     "content_scripts": [
         {

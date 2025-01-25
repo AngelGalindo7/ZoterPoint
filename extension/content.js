@@ -1,3 +1,4 @@
+/*
 const cursorDisplay = document.createElement('div');
 cursorDisplay.style.position = 'absolute';
 cursorDisplay.style.top = '10px';
@@ -17,4 +18,13 @@ document.addEventListener('mousemove', function(event) {
 
 cursorDisplay.addEventListener('click', function() {
   alert('The div was clicked!');
+});
+*/
+
+document.addEventListener("mousedown", (event) => {
+  if (event.altKey && event.button == 0) {
+    const cursorX = event.clientX;
+    const cursorY = event.clientY;
+    alert("Mouse pos: " + cursorX + ", " + cursorY);
+  }
 });
