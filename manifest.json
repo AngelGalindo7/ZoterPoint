@@ -5,15 +5,12 @@
     "description": "To do later",
     "permissions": [
         "identity",
-        "scripting",
+        "activeTab",
         "storage"
     ],
     "host_permissions": [
         "https://www.googleapis.com/*"
     ],
-    "background": {
-        "scripts" : ["extension/background.js"]
-    },
     "oauth2": {
         "client_id": "private",
         "scopes": [
