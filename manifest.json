@@ -1,6 +1,15 @@
 {
     "manifest_version": 3,
     "name": "Zotter Point",
-    "version": 1.0,
-    "description": "To do later"
+    "version": "1.0",
+    "description": "To do later",
+    "permissions": [
+        "activeTab"
+    ],
+    "content_scripts": [
+        {
+            "matches" : ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ]
 }
