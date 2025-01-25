@@ -47,17 +47,8 @@ def get_slide_ids(slide_num):
 
 def add_red_asterisk():
     slides_service = build("slides", "v1", credentials=credentials)
-    # SLIDE_ID = get_slide_ids(1) # first slide rn
-    authed_session = AuthorizedSession(credentials)
+    SLIDE_ID = get_slide_ids(1) # first slide rn
 
-    payload = {
-        'presentationID' : PRESENTATION_ID,
-        'slideID' : SLIDE_ID
-    }
-
-    response = authed_session.post(WEB_APP_URL, json=payload)
-
-    '''
     requests = [
         {
             'createShape': {
@@ -108,7 +99,6 @@ def add_red_asterisk():
     }
 
     response = slides_service.presentations().batchUpdate(presentationId = PRESENTATION_ID, body=body).execute()
-    '''
 
     print(f"Successfully added red asterisk to slide with following response: {response}")
 
