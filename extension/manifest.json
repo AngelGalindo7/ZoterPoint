@@ -4,7 +4,8 @@
     "version": "1.0.0",
     "description": "To do later",
     "icons": {
-        "32": "icons/Icon.png"
+        "32": "icons/Icon.png",
+        "48": "icons/Icon.png"
     },
     "permissions": [
         "identity",
