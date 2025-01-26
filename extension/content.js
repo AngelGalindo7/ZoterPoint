@@ -412,26 +412,20 @@ function ratioToLocation(ratioX, ratioY) {
 
 // Add click event listener to the document
 document.addEventListener('click', (e) => {
-    if (!e.ctrlKey) return;
+    let slideContainer = document.getElementById("canvas-container");
+    let slideContainer_bound = slideContainer.getBoundingClientRect();
+  
+    //do Bound check
+  const isInBounds =
+    e.clientX >= slideContainer_bound.left &&
+    e.clientX <= slideContainer_bound.right &&
+    e.clientY >= slideContainer_bound.top &&
+    e.clientY <= slideContainer_bound.bottom;
 
-    //perform bound check when on google slides
-    if(window.location.href.includes('docs.google.com/presentation/')){
-        console.log("You are viewing google slide");
-        let slideContainer = document.getElementById("canvas-container");
-        let slideContainer_bound = slideContainer.getBoundingClientRect();
-        const isInBounds =
-        e.clientX >= slideContainer_bound.left &&
-        e.clientX <= slideContainer_bound.right &&
-        e.clientY >= slideContainer_bound.top &&
-        e.clientY <= slideContainer_bound.bottom;
-
-        if (!isInBounds) {
-        // alert("You can only make comment on slide!")
-        return;
-        }
-    }
-
-
+  if (!isInBounds) {
+    // alert("You can only make comment on slide!")
+    return;
+  }
 
   // Prevent creating a comment if clicking on an existing comment block
   if (e.target.closest('.comment-block')) return;
