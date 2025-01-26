@@ -1,11 +1,13 @@
 const emojiMap = {
     // Emotions
-    'confuse': '😕',
+    'confused': '😕',
     'happy': '😊',
     'sad': '😢',
     'angry': '😠',
+    'mad': '😠',
     'love': '❤️',
     'laugh': '😂',
+    'lol': '😂',
     'cool': '😎',
     'cry': '😭',
     'surprise': '😮',
@@ -77,6 +79,7 @@ const emojiMap = {
     'thumbs-up': '👍',
     'thumbs-down': '👎',
     'ok': '👌',
+    'okay': '👌',
     'clap': '👏',
     'pray': '🙏',
     'wave': '👋',
@@ -380,11 +383,40 @@ const emojiMap = {
     'white-square-button': '🔳',
     'black-square-button': '🔲'
 };
+//const cursorUrl = chrome.runtime.getURL('icons/32x32.png');
+
+let ratioX;
+let ratioY;
+
+//create an invisible commentInput object
+const commentInput = document.createElement("div");
+commentInput.id = "#popup"
+commentInput.style.position = 'absolute';
+commentInput.style.background = '#EB9C27';
+commentInput.style.border = '2px dashed #ccc';
+commentInput.style.borderRadius = '0.5rem';
+commentInput.style.padding = '10px';
+commentInput.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+commentInput.style.maxWidth = '200px';
+commentInput.style.display = 'none';
+const form = document.createElement("input");
+form.id = "#input";
+form.type = 'text';
+form.placeholder = "Enter your comment";
+commentInput.focus();
+form.addEventListener("keypress", (e) => {
+    if (e.key === 'Enter') {
+        if (form.value == '') return; //do not submit if comment is empty
+        submitComment(form.value,ratioX, ratioY);
+        commentInput.style.display = 'none'; //dismiss after input
+        form.value = ''; //clear value
+    }
+})
+commentInput.appendChild(form);
+document.body.appendChild(commentInput);
 
 let slideContainer;
 let slideContainer_bound;
-
-// Define the emoji map
 
 let clickX, clickY;
 
@@ -400,23 +432,125 @@ function ratioToLocation(ratioX, ratioY) {
 
     let overallX = xInSlide + bound.left;
     let overallY = yInSlide + bound.top;
-
-    console.log("calc container width: " + containerWidth);
-    console.log("calc container height: " + containerHeight);
-
-    console.log("calc container top: " + bound.top);
-    console.log("calc container left: " + bound.left);
     
     return [overallX, overallY];
 }
 
+// Session ID + Slide ID
+/*
+let SERVER_URL = 'http://18.117.98.43:3000/data'
+
+
+async function sendLinkToServer(link, USER_ID) {
+    fetch(SERVER_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({link : link})
+    })
+    .then(response => response.json())
+    .then(data => console.log('Response from server:', data))
+    .catch(error => console.error('Error:', error));
+}
+*/
+/*
+async function sendQuestionToServer(text, x_pos, y_pos, user_creator){
+    const payload = {
+        text : text,
+        x_pos : x_pos,
+        y_pos : y_pos,
+        userId : user_creator,
+    };
+    const response = await fetch(SERVER_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "applciation/json",
+        },
+        body : JSON.stringify(payload),
+    });
+} 
+    
+function 
+
+
+*/
+
+let currUrl = window.location.href;
+
+// THE INTERVAL FUNCTION
+
+const INTERVAL = 1000; // 1 second (1000 milliseconds)
+
+setInterval(function() {
+    
+    // Checks whether the URL has changed (which means we've moved to a new slide)
+    let newCurrUrl = window.location.href;
+    if (currUrl != newCurrUrl) {
+        currUrl = newCurrUrl;
+        
+        // CALL TO A FUNCTION THAT REFRESHES EVERYTHING
+
+    }
+    
+}, INTERVAL);
+
+function submitComment(input, percentX, percentY){
+    let position = ratioToLocation(percentX, percentY);
+    // Create the comment block
+    const commentBlock = document.createElement('div');
+    // stylized comment block
+    commentBlock.className = 'comment-block';
+    commentBlock.style.position = 'absolute';
+    commentBlock.style.left = `${position[0]}px`;
+    commentBlock.style.top = `${position[1]}px`;
+    commentBlock.style.background = '#EB9C27'; // orange-golden (rgb: 235, 156, 39)
+    commentBlock.style.border = '2px dashed #ccc';
+    commentBlock.style.borderRadius = '0.5rem';
+    commentBlock.style.padding = '10px';
+    commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    //commentBlock.style.maxWidth = '200px';
+    commentBlock.style.transition = 'font-size 0.3s ease'
+    commentBlock.addEventListener('mouseenter', () => {
+        commentBlock.style.fontSize = '50px';
+    })
+
+    commentBlock.addEventListener('mouseleave', () => {
+        commentBlock.style.fontSize = '10px';
+    })
+
+    commentBlock.addEventListener("click", () => {
+        commentBlock.remove();
+    })
+    document.body.appendChild(commentBlock);
+
+    if (input.startsWith('/')) {
+        const [keyword, ...textContent] = input.slice(1).split(' ');
+        const emoji = emojiMap[keyword.toLowerCase()] || '❓';
+        const text = textContent.join(' ');
+
+        commentBlock.dataset.emoji = emoji;
+        commentBlock.dataset.text = text;
+        commentBlock.innerHTML = `${emoji} ${text}`;
+    } else {
+        commentBlock.dataset.text = input;
+        commentBlock.innerHTML = `${input}`;
+    }
+}
+
 // Add click event listener to the document
 document.addEventListener('click', (e) => {
+    /*
+    if (!e.ctrlKey) {
+        return;
+    }
+    */
+
     let slideContainer = document.getElementById("canvas-container");
     let slideContainer_bound = slideContainer.getBoundingClientRect();
   
     //do Bound check
-  const isInBounds =
+    const isInBounds =
     e.clientX >= slideContainer_bound.left &&
     e.clientX <= slideContainer_bound.right &&
     e.clientY >= slideContainer_bound.top &&
@@ -440,65 +574,17 @@ document.addEventListener('click', (e) => {
 
   const containerWidth = slideContainer_bound.right - slideContainer_bound.left;
   const containerHeight = slideContainer_bound.bottom - slideContainer_bound.top;
-  let ratioX = cclickX / containerWidth;
-  let ratioY = cclickY / containerHeight;
-
-  let calcPos = ratioToLocation(ratioX, ratioY);
-
-  console.log("actual container top: " + slideContainer_bound.top);
-  console.log("actual container left: " + slideContainer_bound.left);
-  console.log("actual container width: " + containerWidth);
-  console.log("actual container height: " + containerHeight);
-
-  console.log("calculated x: " + calcPos[0]);
-  console.log("calculated y: " + calcPos[1]);
-  console.log("actual x: " + e.clientX);
-  console.log("actual y: " + e.clientY);
+  ratioX = cclickX / containerWidth;
+  ratioY = cclickY / containerHeight;
 
   // Prompt the user for a comment
-  const input = prompt('Enter your comment (start with /emoji for an emoji):');
-
-  if (input) {
-      if (input.startsWith('/')) {
-          const [keyword, ...textContent] = input.slice(1).split(' ');
-          const emoji = emojiMap[keyword.toLowerCase()] || '❓';
-          const text = textContent.join(' ');
-
-          // Create the comment block
-          const commentBlock = document.createElement('div');
-          commentBlock.className = 'comment-block';
-          commentBlock.style.position = 'absolute';
-          commentBlock.style.left = `${clickX}px`;
-          commentBlock.style.top = `${clickY}px`;
-          commentBlock.style.background = 'white';
-          commentBlock.style.border = '1px solid #ccc';
-          commentBlock.style.padding = '10px';
-          commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-          commentBlock.style.maxWidth = '200px';
-          commentBlock.style.wordWrap = 'break-word';
-          commentBlock.dataset.emoji = emoji;
-          commentBlock.dataset.text = text;
-          commentBlock.innerHTML = `${emoji} ${text}`;
-
-          // Append the comment block to the body
-          document.body.appendChild(commentBlock);
-      } else {
-          // Create a comment block without an emoji
-          const commentBlock = document.createElement('div');
-          commentBlock.className = 'comment-block';
-          commentBlock.style.position = 'absolute';
-          commentBlock.style.left = `${clickX}px`;
-          commentBlock.style.top = `${clickY}px`;
-          commentBlock.style.background = 'white';
-          commentBlock.style.border = '1px solid #ccc';
-          commentBlock.style.padding = '10px';
-          commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-          commentBlock.style.maxWidth = '200px';
-          commentBlock.style.wordWrap = 'break-word';
-          commentBlock.textContent = input;
-
-          // Append the comment block to the body
-          document.body.appendChild(commentBlock);
-      }
-  }
+  //const input = prompt('Enter your comment (start with /emoji for an emoji):');
+  if (e.target.closest('#popup')) return;
+    const p = document.getElementById('#popup');
+    p.style.left = `${clickX}px`;
+    p.style.top = `${clickY}px`;
+    p.style.display = 'block';
+    const form = document.getElementById("#input");
+    form.focus(); //focus on that so user can enter right away
+  //submit comment logic handle separately
 });
