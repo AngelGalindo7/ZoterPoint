@@ -381,16 +381,41 @@ const emojiMap = {
     'black-square-button': '🔲'
 };
 
-const slideContainer = document.getElementById("canvas-container");
-const slideContainer_bound = slideContainer.getBoundingClientRect();
+let slideContainer;
+let slideContainer_bound;
 
 // Define the emoji map
 
 let clickX, clickY;
 
+function ratioToLocation(ratioX, ratioY) {
+    let container = document.getElementById("canvas-container");
+    let bound = container.getBoundingClientRect();
+
+    const containerWidth = bound.right - bound.left;
+    const containerHeight = bound.bottom - bound.top;
+
+    let xInSlide = ratioX * containerWidth;
+    let yInSlide = ratioY * containerHeight;
+
+    let overallX = xInSlide + bound.left;
+    let overallY = yInSlide + bound.top;
+
+    console.log("calc container width: " + containerWidth);
+    console.log("calc container height: " + containerHeight);
+
+    console.log("calc container top: " + bound.top);
+    console.log("calc container left: " + bound.left);
+    
+    return [overallX, overallY];
+}
+
 // Add click event listener to the document
 document.addEventListener('click', (e) => {
-  //do Bound check
+    let slideContainer = document.getElementById("canvas-container");
+    let slideContainer_bound = slideContainer.getBoundingClientRect();
+  
+    //do Bound check
   const isInBounds =
     e.clientX >= slideContainer_bound.left &&
     e.clientX <= slideContainer_bound.right &&
@@ -410,13 +435,25 @@ document.addEventListener('click', (e) => {
   clickY = e.clientY;
 
   // Clamps the mouse pos relative to canvas-container
-  clickX -= slideContainer_bound.left;
-  clickY -= slideContainer_bound.right;
+  let cclickX = clickX - slideContainer_bound.left;
+  let cclickY = clickY - slideContainer_bound.top;
 
-  const containerWidth = slideContainer_bound.right - slideCounter_bound.left;
-  const containerHeight = slideContainer_bound.bottom - slideCounter_bound.top;
-  let ratioX = clickX / containerWidth;
-  let ratioY = clickY / containerHeight;
+  const containerWidth = slideContainer_bound.right - slideContainer_bound.left;
+  const containerHeight = slideContainer_bound.bottom - slideContainer_bound.top;
+  let ratioX = cclickX / containerWidth;
+  let ratioY = cclickY / containerHeight;
+
+  let calcPos = ratioToLocation(ratioX, ratioY);
+
+  console.log("actual container top: " + slideContainer_bound.top);
+  console.log("actual container left: " + slideContainer_bound.left);
+  console.log("actual container width: " + containerWidth);
+  console.log("actual container height: " + containerHeight);
+
+  console.log("calculated x: " + calcPos[0]);
+  console.log("calculated y: " + calcPos[1]);
+  console.log("actual x: " + e.clientX);
+  console.log("actual y: " + e.clientY);
 
   // Prompt the user for a comment
   const input = prompt('Enter your comment (start with /emoji for an emoji):');
