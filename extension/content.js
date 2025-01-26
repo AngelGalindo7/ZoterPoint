@@ -412,20 +412,26 @@ function ratioToLocation(ratioX, ratioY) {
 
 // Add click event listener to the document
 document.addEventListener('click', (e) => {
-    let slideContainer = document.getElementById("canvas-container");
-    let slideContainer_bound = slideContainer.getBoundingClientRect();
-  
-    //do Bound check
-  const isInBounds =
-    e.clientX >= slideContainer_bound.left &&
-    e.clientX <= slideContainer_bound.right &&
-    e.clientY >= slideContainer_bound.top &&
-    e.clientY <= slideContainer_bound.bottom;
+    if (!e.ctrlKey) return;
 
-  if (!isInBounds) {
-    // alert("You can only make comment on slide!")
-    return;
-  }
+    //perform bound check when on google slides
+    if(window.location.href.includes('docs.google.com/presentation/')){
+        console.log("You are viewing google slide");
+        let slideContainer = document.getElementById("canvas-container");
+        let slideContainer_bound = slideContainer.getBoundingClientRect();
+        const isInBounds =
+        e.clientX >= slideContainer_bound.left &&
+        e.clientX <= slideContainer_bound.right &&
+        e.clientY >= slideContainer_bound.top &&
+        e.clientY <= slideContainer_bound.bottom;
+
+        if (!isInBounds) {
+        // alert("You can only make comment on slide!")
+        return;
+        }
+    }
+
+
 
   // Prevent creating a comment if clicking on an existing comment block
   if (e.target.closest('.comment-block')) return;
@@ -502,53 +508,3 @@ document.addEventListener('click', (e) => {
       }
   }
 });
-
-
-
-/*
-// Get the element with the ID 'canvas-container'
-const canvasContainer = document.getElementById('canvas-container');
-
-// Check if the element exists
-if (canvasContainer) {
-    // Add a 'mouseenter' event listener to the element
-    canvasContainer.addEventListener('mouseenter', () => {
-        console.log('Cursor entered the canvas-container element.');
-    });
-
-    // Add a 'mouseleave' event listener to the element
-    canvasContainer.addEventListener('mouseleave', () => {
-        console.log('Cursor left the canvas-container element.');
-    });
-} else {
-    console.error('Element with ID "canvas-container" not found.');
-}
-    */
-
-/*
-// Select the element to monitor
-const myDiv = document.querySelector('canvas-container'); // Replace with your target element
-
-// Add an event listener to track the mouse position
-document.addEventListener('mousemove', (event) => {
-    // Get the bounding rectangle of the element
-    const rect = myDiv.getBoundingClientRect();
-
-    // Get the cursor's position (relative to the viewport)
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
-
-    // Check if the cursor is within the rectangle
-    const isWithinBounds =
-        mouseX >= rect.left &&
-        mouseX <= rect.right &&
-        mouseY >= rect.top &&
-        mouseY <= rect.bottom;
-
-    if (isWithinBounds) {
-        console.log('Cursor is inside the element.');
-    } else {
-        console.log('Cursor is outside the element.');
-    }
-});
-*/
