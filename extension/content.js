@@ -1,13 +1,11 @@
 const emojiMap = {
     // Emotions
-    'confused': '😕',
+    'confuse': '😕',
     'happy': '😊',
     'sad': '😢',
     'angry': '😠',
-    'mad': '😠',
     'love': '❤️',
     'laugh': '😂',
-    'lol': '😂',
     'cool': '😎',
     'cry': '😭',
     'surprise': '😮',
@@ -79,7 +77,6 @@ const emojiMap = {
     'thumbs-up': '👍',
     'thumbs-down': '👎',
     'ok': '👌',
-    'okay': '👌',
     'clap': '👏',
     'pray': '🙏',
     'wave': '👋',
@@ -384,121 +381,11 @@ const emojiMap = {
     'black-square-button': '🔲'
 };
 
-
-/*
- *        SETS UP SET OF DOM ELEMENTS
-*/
-
-// An object as a dictionary, initially empty
-// key: id provided by server, value: struct (or something else?) of attributes that should match the JSON format
-let domElements = {};
-
-
-/*
- *        ALL CALLS AND FUNCTIONS TO/FROM THE SERVER/DATABASE GO HERE
-*/
-
-// Session ID + Slide ID
-/*
-let SERVER_URL = 'http://18.117.98.43:3000/data'
-
-
-async function sendLinkToServer(link, USER_ID) {
-    fetch(SERVER_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({link : link})
-    })
-    .then(response => response.json())
-    .then(data => console.log('Response from server:', data))
-    .catch(error => console.error('Error:', error));
-}
-*/
-/*
-async function sendQuestionToServer(text, x_pos, y_pos, user_creator){
-    const payload = {
-        text : text,
-        x_pos : x_pos,
-        y_pos : y_pos,
-        userId : user_creator,
-    };
-    const response = await fetch(SERVER_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "applciation/json",
-        },
-        body : JSON.stringify(payload),
-    });
-} 
-    
-function 
-
-
-*/
-
-
-/*
- *        RETRIEVES DATA REGARDING PROFESSOR VALUE
-*/
-
-let isProfessor = false; // Default value
-
-// Get the current value from storage
-chrome.storage.sync.get('booleanValue', (data) => {
-    isProfessor = data.booleanValue || false;
-    console.log('Initial boolean value:', isProfessor);
-});
-
-// Listen for changes to the value in storage
-chrome.storage.onChanged.addListener((changes, namespace) => {
-    if (namespace === 'sync' && changes.booleanValue) {
-        isProfessor = changes.booleanValue.newValue;
-        console.log('Boolean value updated to:', isProfessor);
-    }
-});
-
-
-/*
- *        ALL ELEMENT CREATION AND INPUT GOES HERE
-*/
-
-//const cursorUrl = chrome.runtime.getURL('icons/32x32.png');
-
-let ratioX;
-let ratioY;
-
-//create an invisible commentInput object
-const commentInput = document.createElement("div");
-commentInput.id = "#popup"
-commentInput.style.position = 'absolute';
-commentInput.style.background = '#EB9C27';
-commentInput.style.border = '2px dashed #ccc';
-commentInput.style.borderRadius = '0.5rem';
-commentInput.style.padding = '10px';
-commentInput.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-commentInput.style.maxWidth = '200px';
-commentInput.style.display = 'none';
-const form = document.createElement("input");
-form.id = "#input";
-form.type = 'text';
-form.placeholder = "Enter your comment";
-commentInput.focus();
-form.addEventListener("keypress", (e) => {
-    if (e.key === 'Enter') {
-        if (form.value == '') return; //do not submit if comment is empty
-        submitComment(form.value,ratioX, ratioY);
-        commentInput.style.display = 'none'; //dismiss after input
-        form.value = ''; //clear value
-    }
-})
-commentInput.appendChild(form);
-document.body.appendChild(commentInput);
-
 let slideContainer;
 let slideContainer_bound;
 
+//change cursor
+document.body.style.cursor = 'url("icons/32x32.png"), zoom-in';
 let clickX, clickY;
 
 function ratioToLocation(ratioX, ratioY) {
@@ -513,81 +400,23 @@ function ratioToLocation(ratioX, ratioY) {
 
     let overallX = xInSlide + bound.left;
     let overallY = yInSlide + bound.top;
+
+    console.log("calc container width: " + containerWidth);
+    console.log("calc container height: " + containerHeight);
+
+    console.log("calc container top: " + bound.top);
+    console.log("calc container left: " + bound.left);
     
     return [overallX, overallY];
 }
 
-function submitComment(input, percentX, percentY){
-    let position = ratioToLocation(percentX, percentY);
-    // Create the comment block
-    const commentBlock = document.createElement('div');
-    commentBlock.dataset.upvote = 0;
-    // stylized comment block
-    commentBlock.className = 'comment-block';
-    commentBlock.style.position = 'absolute';
-    commentBlock.style.left = `${position[0]}px`;
-    commentBlock.style.top = `${position[1]}px`;
-    commentBlock.style.background = '#EB9C27'; // orange-golden (rgb: 235, 156, 39)
-    commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
-    commentBlock.style.border = '2px dashed #ccc';
-    commentBlock.style.borderRadius = '0.5rem';
-    commentBlock.style.padding = '10px';
-    commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-    //commentBlock.style.maxWidth = '200px';
-    commentBlock.style.transition = 'font-size 0.3s ease'
-    
-    //scaling effect when zoom in
-    // commentBlock.addEventListener('mouseenter', () => {
-    //     commentBlock.style.fontSize = '50px';
-    // })
-    // commentBlock.addEventListener('mouseleave', () => {
-    //     commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
-    // })
-
-    commentBlock.addEventListener('mouseleave', () => {
-        commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
-    })
-
-    commentBlock.addEventListener("click", (e) => {
-        if (e.shiftKey) {
-            commentBlock.remove();
-        }
-        else {
-            let newCount = parseInt(commentBlock.dataset.upvote);
-            newCount += 1;
-            commentBlock.dataset.upvote = newCount;
-            //alert(`${commentBlock.dataset.upvote} people agree with you!`);
-        }
-    })
-    document.body.appendChild(commentBlock);
-
-    if (input.startsWith('/')) {
-        const [keyword, ...textContent] = input.slice(1).split(' ');
-        const emoji = emojiMap[keyword.toLowerCase()] || '❓';
-        const text = textContent.join(' ');
-
-        commentBlock.dataset.emoji = emoji;
-        commentBlock.dataset.text = text;
-        commentBlock.innerHTML = `${emoji} ${text}`;
-    } else {
-        commentBlock.dataset.text = input;
-        commentBlock.innerHTML = `${input}`;
-    }
-}
-
 // Add click event listener to the document
 document.addEventListener('click', (e) => {
-    /*
-    if (!e.ctrlKey) {
-        return;
-    }
-    */
-
     let slideContainer = document.getElementById("canvas-container");
     let slideContainer_bound = slideContainer.getBoundingClientRect();
   
     //do Bound check
-    const isInBounds =
+  const isInBounds =
     e.clientX >= slideContainer_bound.left &&
     e.clientX <= slideContainer_bound.right &&
     e.clientY >= slideContainer_bound.top &&
@@ -597,6 +426,7 @@ document.addEventListener('click', (e) => {
     // alert("You can only make comment on slide!")
     return;
   }
+  
 
   // Prevent creating a comment if clicking on an existing comment block
   if (e.target.closest('.comment-block')) return;
@@ -611,43 +441,115 @@ document.addEventListener('click', (e) => {
 
   const containerWidth = slideContainer_bound.right - slideContainer_bound.left;
   const containerHeight = slideContainer_bound.bottom - slideContainer_bound.top;
-  ratioX = cclickX / containerWidth;
-  ratioY = cclickY / containerHeight;
+  let ratioX = cclickX / containerWidth;
+  let ratioY = cclickY / containerHeight;
+
+  let calcPos = ratioToLocation(ratioX, ratioY);
+
+  console.log("actual container top: " + slideContainer_bound.top);
+  console.log("actual container left: " + slideContainer_bound.left);
+  console.log("actual container width: " + containerWidth);
+  console.log("actual container height: " + containerHeight);
+
+  console.log("calculated x: " + calcPos[0]);
+  console.log("calculated y: " + calcPos[1]);
+  console.log("actual x: " + e.clientX);
+  console.log("actual y: " + e.clientY);
 
   // Prompt the user for a comment
-  //const input = prompt('Enter your comment (start with /emoji for an emoji):');
-  if (e.target.closest('#popup')) return;
-    const p = document.getElementById('#popup');
-    p.style.left = `${clickX}px`;
-    p.style.top = `${clickY}px`;
-    p.style.display = 'block';
-    const form = document.getElementById("#input");
-    form.focus(); //focus on that so user can enter right away
-  //submit comment logic handle separately
+  const input = prompt('Enter your comment (start with /emoji for an emoji):');
+
+  if (input) {
+      if (input.startsWith('/')) {
+          const [keyword, ...textContent] = input.slice(1).split(' ');
+          const emoji = emojiMap[keyword.toLowerCase()] || '❓';
+          const text = textContent.join(' ');
+
+          // Create the comment block
+          const commentBlock = document.createElement('div');
+          commentBlock.className = 'comment-block';
+          commentBlock.style.position = 'absolute';
+          commentBlock.style.left = `${clickX}px`;
+          commentBlock.style.top = `${clickY}px`;
+          commentBlock.style.background = 'white';
+          commentBlock.style.border = '1px solid #ccc';
+          commentBlock.style.padding = '10px';
+          commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+          commentBlock.style.maxWidth = '200px';
+          commentBlock.style.wordWrap = 'break-word';
+          commentBlock.dataset.emoji = emoji;
+          commentBlock.dataset.text = text;
+          commentBlock.innerHTML = `${emoji} ${text}`;
+
+          // Append the comment block to the body
+          document.body.appendChild(commentBlock);
+      } else {
+          // Create a comment block without an emoji
+          const commentBlock = document.createElement('div');
+          commentBlock.className = 'comment-block';
+          commentBlock.style.position = 'absolute';
+          commentBlock.style.left = `${clickX}px`;
+          commentBlock.style.top = `${clickY}px`;
+          commentBlock.style.background = 'white';
+          commentBlock.style.border = '1px solid #ccc';
+          commentBlock.style.padding = '10px';
+          commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+          commentBlock.style.maxWidth = '200px';
+          commentBlock.style.wordWrap = 'break-word';
+          commentBlock.textContent = input;
+
+          // Append the comment block to the body
+          document.body.appendChild(commentBlock);
+      }
+  }
 });
 
 
+
 /*
- *        ALL INTERVAL-RELATED CODE GOES HERE
-*/
+// Get the element with the ID 'canvas-container'
+const canvasContainer = document.getElementById('canvas-container');
 
-let currUrl = window.location.href;
+// Check if the element exists
+if (canvasContainer) {
+    // Add a 'mouseenter' event listener to the element
+    canvasContainer.addEventListener('mouseenter', () => {
+        console.log('Cursor entered the canvas-container element.');
+    });
 
-// THE INTERVAL FUNCTION
+    // Add a 'mouseleave' event listener to the element
+    canvasContainer.addEventListener('mouseleave', () => {
+        console.log('Cursor left the canvas-container element.');
+    });
+} else {
+    console.error('Element with ID "canvas-container" not found.');
+}
+    */
 
-const INTERVAL = 1000; // 1 second (1000 milliseconds)
+/*
+// Select the element to monitor
+const myDiv = document.querySelector('canvas-container'); // Replace with your target element
 
-setInterval(function() {
-    
-    // Checks whether the URL has changed (which means we've moved to a new slide)
-    let newCurrUrl = window.location.href;
-    if (currUrl != newCurrUrl) {
-        currUrl = newCurrUrl;
-        
-        // CALL TO A FUNCTION THAT REFRESHES EVERYTHING
+// Add an event listener to track the mouse position
+document.addEventListener('mousemove', (event) => {
+    // Get the bounding rectangle of the element
+    const rect = myDiv.getBoundingClientRect();
 
+    // Get the cursor's position (relative to the viewport)
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+
+    // Check if the cursor is within the rectangle
+    const isWithinBounds =
+        mouseX >= rect.left &&
+        mouseX <= rect.right &&
+        mouseY >= rect.top &&
+        mouseY <= rect.bottom;
+
+    if (isWithinBounds) {
+        console.log('Cursor is inside the element.');
+    } else {
+        console.log('Cursor is outside the element.');
     }
-
-    console.log("isProfessor: " + isProfessor);
-    
-}, INTERVAL);
+});
+*/
