@@ -3,6 +3,9 @@
     "name": "Zotter Point",
     "version": "1.0",
     "description": "To do later",
+    "icon": {
+        "128": "icon.png"
+    },
     "permissions": [
         "identity",
         "activeTab",
