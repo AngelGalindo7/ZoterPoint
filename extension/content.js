@@ -383,6 +383,87 @@ const emojiMap = {
     'white-square-button': '🔳',
     'black-square-button': '🔲'
 };
+
+
+/*
+ *        SETS UP SET OF DOM ELEMENTS
+*/
+
+// An object as a dictionary, initially empty
+// key: id provided by server, value: struct (or something else?) of attributes that should match the JSON format
+let domElements = {};
+
+
+/*
+ *        ALL CALLS AND FUNCTIONS TO/FROM THE SERVER/DATABASE GO HERE
+*/
+
+// Session ID + Slide ID
+/*
+let SERVER_URL = 'http://18.117.98.43:3000/data'
+
+
+async function sendLinkToServer(link, USER_ID) {
+    fetch(SERVER_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({link : link})
+    })
+    .then(response => response.json())
+    .then(data => console.log('Response from server:', data))
+    .catch(error => console.error('Error:', error));
+}
+*/
+/*
+async function sendQuestionToServer(text, x_pos, y_pos, user_creator){
+    const payload = {
+        text : text,
+        x_pos : x_pos,
+        y_pos : y_pos,
+        userId : user_creator,
+    };
+    const response = await fetch(SERVER_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "applciation/json",
+        },
+        body : JSON.stringify(payload),
+    });
+} 
+    
+function 
+
+
+*/
+
+
+/*
+ *        RETRIEVES DATA REGARDING PROFESSOR VALUE
+*/
+
+let isProfessor = false; // Default value
+
+// Get the current value from storage
+chrome.storage.sync.get('booleanValue', (data) => {
+    isProfessor = data.booleanValue || false;
+    console.log('Initial boolean value:', isProfessor);
+});
+
+// Listen for changes to the value in storage
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'sync' && changes.booleanValue) {
+        isProfessor = changes.booleanValue.newValue;
+        console.log('Boolean value updated to:', isProfessor);
+    }
+});
+
+
+/*
+ *        ALL ELEMENT CREATION AND INPUT GOES HERE
+*/
+
 //const cursorUrl = chrome.runtime.getURL('icons/32x32.png');
 
 let ratioX;
@@ -436,91 +517,47 @@ function ratioToLocation(ratioX, ratioY) {
     return [overallX, overallY];
 }
 
-// Session ID + Slide ID
-/*
-let SERVER_URL = 'http://18.117.98.43:3000/data'
-
-
-async function sendLinkToServer(link, USER_ID) {
-    fetch(SERVER_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({link : link})
-    })
-    .then(response => response.json())
-    .then(data => console.log('Response from server:', data))
-    .catch(error => console.error('Error:', error));
-}
-*/
-/*
-async function sendQuestionToServer(text, x_pos, y_pos, user_creator){
-    const payload = {
-        text : text,
-        x_pos : x_pos,
-        y_pos : y_pos,
-        userId : user_creator,
-    };
-    const response = await fetch(SERVER_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "applciation/json",
-        },
-        body : JSON.stringify(payload),
-    });
-} 
-    
-function 
-
-
-*/
-
-let currUrl = window.location.href;
-
-// THE INTERVAL FUNCTION
-
-const INTERVAL = 1000; // 1 second (1000 milliseconds)
-
-setInterval(function() {
-    
-    // Checks whether the URL has changed (which means we've moved to a new slide)
-    let newCurrUrl = window.location.href;
-    if (currUrl != newCurrUrl) {
-        currUrl = newCurrUrl;
-        
-        // CALL TO A FUNCTION THAT REFRESHES EVERYTHING
-
-    }
-    
-}, INTERVAL);
-
 function submitComment(input, percentX, percentY){
     let position = ratioToLocation(percentX, percentY);
     // Create the comment block
     const commentBlock = document.createElement('div');
+    commentBlock.dataset.upvote = 0;
     // stylized comment block
     commentBlock.className = 'comment-block';
     commentBlock.style.position = 'absolute';
     commentBlock.style.left = `${position[0]}px`;
     commentBlock.style.top = `${position[1]}px`;
     commentBlock.style.background = '#EB9C27'; // orange-golden (rgb: 235, 156, 39)
+    commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
     commentBlock.style.border = '2px dashed #ccc';
     commentBlock.style.borderRadius = '0.5rem';
     commentBlock.style.padding = '10px';
     commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     //commentBlock.style.maxWidth = '200px';
     commentBlock.style.transition = 'font-size 0.3s ease'
-    commentBlock.addEventListener('mouseenter', () => {
-        commentBlock.style.fontSize = '50px';
-    })
+    
+    //scaling effect when zoom in
+    // commentBlock.addEventListener('mouseenter', () => {
+    //     commentBlock.style.fontSize = '50px';
+    // })
+    // commentBlock.addEventListener('mouseleave', () => {
+    //     commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
+    // })
 
     commentBlock.addEventListener('mouseleave', () => {
-        commentBlock.style.fontSize = '10px';
+        commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
     })
 
-    commentBlock.addEventListener("click", () => {
-        commentBlock.remove();
+    commentBlock.addEventListener("click", (e) => {
+        if (e.shiftKey) {
+            commentBlock.remove();
+        }
+        else {
+            let newCount = parseInt(commentBlock.dataset.upvote);
+            newCount += 1;
+            commentBlock.dataset.upvote = newCount;
+            //alert(`${commentBlock.dataset.upvote} people agree with you!`);
+        }
     })
     document.body.appendChild(commentBlock);
 
@@ -588,3 +625,29 @@ document.addEventListener('click', (e) => {
     form.focus(); //focus on that so user can enter right away
   //submit comment logic handle separately
 });
+
+
+/*
+ *        ALL INTERVAL-RELATED CODE GOES HERE
+*/
+
+let currUrl = window.location.href;
+
+// THE INTERVAL FUNCTION
+
+const INTERVAL = 1000; // 1 second (1000 milliseconds)
+
+setInterval(function() {
+    
+    // Checks whether the URL has changed (which means we've moved to a new slide)
+    let newCurrUrl = window.location.href;
+    if (currUrl != newCurrUrl) {
+        currUrl = newCurrUrl;
+        
+        // CALL TO A FUNCTION THAT REFRESHES EVERYTHING
+
+    }
+
+    console.log("isProfessor: " + isProfessor);
+    
+}, INTERVAL);
