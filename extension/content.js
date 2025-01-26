@@ -439,9 +439,82 @@ function
 */
 
 
+function getCurrentSlideId() {
+    let url = window.location.href;
+    const result = url.split("id.")[1];
+    return result;
+}
+
+
 /*
  *        RETRIEVES DATA REGARDING PROFESSOR VALUE
 */
+
+function constructCommentBlock(jsonData){
+    /*
+    Construct a CommentBlock object and rendering it on the screen
+        sample jsonData = {
+            upvote: integer,
+            x_pos: float,
+            y_pos: float,
+            content: string,
+            slideId: integer,
+        }
+    */
+
+    // Create the comment block
+    const commentBlock = document.createElement('div');
+    //load in json related data
+
+    commentBlock.dataset.upvote = jsonData.upvote;
+    commentBlock.dataset.slideId = jsonData.slideId;
+    commentBlock.style.left = `${jsonData.x_pos}px`;
+    commentBlock.style.top = `${jsonData.y_pos}px`;
+    commentBlock.innerHTML = jsonData.content;
+    // stylized comment block
+    commentBlock.className = 'comment-block';
+    commentBlock.style.position = 'absolute';
+    commentBlock.style.background = '#EB9C27'; // orange-golden (rgb: 235, 156, 39)
+    commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
+    commentBlock.style.border = '2px dashed #ccc';
+    commentBlock.style.borderRadius = '0.5rem';
+    commentBlock.style.padding = '10px';
+    commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    //commentBlock.style.maxWidth = '200px';
+    commentBlock.style.transition = 'font-size 0.3s ease'
+    
+    //scaling effect when zoom in
+    // commentBlock.addEventListener('mouseenter', () => {
+    //     commentBlock.style.fontSize = '50px';
+    // })
+    // commentBlock.addEventListener('mouseleave', () => {
+    //     commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
+    // })
+
+    commentBlock.addEventListener('mouseleave', () => {
+        commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
+    })
+
+    commentBlock.addEventListener("click", (e) => {
+        if (e.shiftKey) {
+            commentBlock.remove();
+            alert("A commentBlock has been removed, contact server!");
+        }
+        else {
+            let newCount = parseInt(commentBlock.dataset.upvote);
+            newCount += 1;
+            commentBlock.dataset.upvote = newCount;
+            //alert(`${commentBlock.dataset.upvote} people agree with you!`);
+        }
+    })
+    document.body.appendChild(commentBlock);
+    
+    alert("A new comment block has been created, contact server!");
+    return commentBlock;
+}
+
+
+
 
 let isProfessor = false; // Default value
 
@@ -502,6 +575,7 @@ let slideContainer_bound;
 let clickX, clickY;
 
 function ratioToLocation(ratioX, ratioY) {
+    // Use this function to convert position percentages (between 0 and 1) to pixels on the screen
     let container = document.getElementById("canvas-container");
     let bound = container.getBoundingClientRect();
 
@@ -519,48 +593,7 @@ function ratioToLocation(ratioX, ratioY) {
 
 function submitComment(input, percentX, percentY){
     let position = ratioToLocation(percentX, percentY);
-    // Create the comment block
-    const commentBlock = document.createElement('div');
-    commentBlock.dataset.upvote = 0;
-    // stylized comment block
-    commentBlock.className = 'comment-block';
-    commentBlock.style.position = 'absolute';
-    commentBlock.style.left = `${position[0]}px`;
-    commentBlock.style.top = `${position[1]}px`;
-    commentBlock.style.background = '#EB9C27'; // orange-golden (rgb: 235, 156, 39)
-    commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
-    commentBlock.style.border = '2px dashed #ccc';
-    commentBlock.style.borderRadius = '0.5rem';
-    commentBlock.style.padding = '10px';
-    commentBlock.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-    //commentBlock.style.maxWidth = '200px';
-    commentBlock.style.transition = 'font-size 0.3s ease'
-    
-    //scaling effect when zoom in
-    // commentBlock.addEventListener('mouseenter', () => {
-    //     commentBlock.style.fontSize = '50px';
-    // })
-    // commentBlock.addEventListener('mouseleave', () => {
-    //     commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
-    // })
-
-    commentBlock.addEventListener('mouseleave', () => {
-        commentBlock.style.fontSize = `${(1+parseInt(commentBlock.dataset.upvote))*10}px`;
-    })
-
-    commentBlock.addEventListener("click", (e) => {
-        if (e.shiftKey) {
-            commentBlock.remove();
-        }
-        else {
-            let newCount = parseInt(commentBlock.dataset.upvote);
-            newCount += 1;
-            commentBlock.dataset.upvote = newCount;
-            //alert(`${commentBlock.dataset.upvote} people agree with you!`);
-        }
-    })
-    document.body.appendChild(commentBlock);
-
+    const commentBlock = constructCommentBlock({upvote: 0, slideId: getCurrentSlideId(), content: '', x_pos: position[0], y_pos: position[1]});
     if (input.startsWith('/')) {
         const [keyword, ...textContent] = input.slice(1).split(' ');
         const emoji = emojiMap[keyword.toLowerCase()] || '❓';
@@ -638,16 +671,15 @@ let currUrl = window.location.href;
 const INTERVAL = 1000; // 1 second (1000 milliseconds)
 
 setInterval(function() {
-    
+
     // Checks whether the URL has changed (which means we've moved to a new slide)
     let newCurrUrl = window.location.href;
     if (currUrl != newCurrUrl) {
         currUrl = newCurrUrl;
-        
-        // CALL TO A FUNCTION THAT REFRESHES EVERYTHING
 
+        alert("Changed to slide id: " + getCurrentSlideId() + " contact server!");
     }
 
     console.log("isProfessor: " + isProfessor);
-    
+
 }, INTERVAL);
